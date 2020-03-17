@@ -4,7 +4,9 @@ Here is an implementation of a Qt plugin for the IXXAT USB adapter V2.
 The plugin should be installed in the Qt root plugin folder then it will be
 available in any Qt CAN example tools, like "CAN Example" (see Testing).
 
-*Now is working with Windows 7.*
+*Tested on Windows 7.*
+
+(*any support and feedback is welcome!*)
 
 ## Requirements
 
@@ -19,7 +21,7 @@ follow these steps to install the plugin in Qt.
 
 #### Clone the repository
 
-clone in `C:\Qt\5.13.0\msvc2017_64\plugins\canbus\ixxatcan`
+clone in `C:\Qt\5.13.0\Src\qtserialbus\src\plugins\canbus`
 
 #### Add project to QT CAN PLUGIN "engine"
 
@@ -28,13 +30,13 @@ and add **ixxatcan** as SUBDIRS in qtConfig(library).
 
 #### Compile project
 
-Open C:\Qt\5.13.0\Src\qtserialbus\src\plugins\canbus\ixxatcan\ixxatcan.pro and compile
+Open project `C:\Qt\5.13.0\Src\qtserialbus\src\plugins\canbus\ixxatcan\ixxatcan.pro` in Qt Creator and compile
 
 #### copy plugin in Qt root folder
 
-from C:\Qt\5.13.0\Src\qtserialbus\src\plugins\canbus\build-ixxatcan-Desktop_Qt_5_13_0_**MSVC2017_64bit**-Debug\plugins\canbus
-copy qtixxatcanbus.dll and qtixxatcanbusd.pdb
-to C:\Qt\5.13.0\\**msvc2017_64**\plugins\canbus
+from `C:\Qt\5.13.0\Src\qtserialbus\src\plugins\canbus\build-ixxatcan-Desktop_Qt_5_13_0_**MSVC2017_64bit**-Debug\plugins\canbus`
+copy **qtixxatcanbus.dll** and **qtixxatcanbusd.pdb**
+to `C:\Qt\5.13.0\\**msvc2017_64*\plugins\canbus`
 
 ## Testing
 
