@@ -40,6 +40,10 @@
   #define _COMPILER_ NILABWIN_C
 #endif
 
+#ifdef __MINGW32__
+  #define _COMPILER_ MINGW_C
+#endif
+
 #ifndef _COMPILER_
   #error "Compiler not supported"
 #endif
@@ -105,6 +109,12 @@
   #endif
 #endif
 
+#ifdef __MINGW32__
+  #define _M_BITS 64
+  #define _M_AMD64_ _M_AMD64
+  #define _M_BYTE_ORDER _LITTLE_ENDIAN
+#endif
+
 #ifndef _M_BITS
 #error "Target architecture not defined"
 #endif
@@ -121,6 +131,12 @@
 #undef __INT8   // default
 #undef __SINT8  // signed
 #undef __UINT8  // unsigned
+
+#ifdef __MINGW32__
+  #define __INT8 INT8
+  #define __SINT8 INT8
+  #define __UINT8 UINT8
+#endif
 
 //
 // Microsoft C/C++ compiler
@@ -162,6 +178,12 @@
 #undef __SINT16 // signed
 #undef __UINT16 // unsigned
 
+#ifdef __MINGW32__
+  #define __INT16 INT16
+  #define __SINT16 INT16
+  #define __UINT16 UINT16
+#endif
+
 //
 // Microsoft C/C++ compiler
 //
@@ -202,6 +224,12 @@
 #undef __SINT32 // signed
 #undef __UINT32 // unsigned
 
+#ifdef __MINGW32__
+  #define __INT32 INT32
+  #define __SINT32 INT32
+  #define __UINT32 UINT32
+#endif
+
 //
 // Microsoft C/C++ compiler
 //
@@ -241,6 +269,12 @@
 #undef __INT64  // default
 #undef __SINT64 // signed
 #undef __UINT64 // unsigned
+
+#ifdef __MINGW32__
+  #define __INT64 INT64
+  #define __SINT64 INT64
+  #define __UINT64 UINT64
+#endif
 
 //
 // Microsoft C/C++ compiler
