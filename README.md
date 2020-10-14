@@ -30,7 +30,7 @@ and add **ixxatcan** as SUBDIRS in qtConfig(library).
 
 #### Compile project
 
-Open project `C:\Qt\5.13.0\Src\qtserialbus\src\plugins\canbus\ixxatcan\ixxatcan.pro` in Qt Creator and compile
+Open project `C:\Qt\5.13.0\Src\qtserialbus\src\plugins\canbus\ixxatcan\ixxatcan.pro` in Qt Creator and compile for **Release**
 
 #### copy plugin in Qt root folder
 
