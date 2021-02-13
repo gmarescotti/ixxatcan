@@ -86,6 +86,7 @@ bool IxxatCanBackend::open()
     driver->init(options);
 
     connect (driver, &CanDriver_ixxatVci::recv, this, &IxxatCanBackend::recv);
+    connect (this, &IxxatCanBackend::send, driver, &CanDriver_ixxatVci::send);
 
     setState(QCanBusDevice::ConnectedState);
     return true;
@@ -208,7 +209,8 @@ bool IxxatCanBackend::writeFrame(const QCanBusFrame &newData)
         return false;
     }
     */
-
+    CanMessage* message = new CanMessage(newData); 
+    emit send(message);
     emit framesWritten(1);
 
     return true;
