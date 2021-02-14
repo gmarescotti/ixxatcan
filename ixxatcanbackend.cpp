@@ -44,6 +44,7 @@
 
 #include "CanDriver_ixxatVci.h"
 
+
 QT_BEGIN_NAMESPACE
 
 Q_DECLARE_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_IXXATCAN)
@@ -120,11 +121,35 @@ void IxxatCanBackend::setConfigurationParameter(int key, const QVariant &value)
     CanFdKey,
     DataBitRateKey,
     */
-
     switch (key) {
-        case QCanBusDevice::RawFilterKey:
-            setError(tr("Filter not yet managed!"), QCanBusDevice::CanBusError::ConfigurationError);
-            //verify valid/supported filters
+        case QCanBusDevice::RawFilterKey: {
+            // setError(tr("Filter not yet managed!"), QCanBusDevice::CanBusError::ConfigurationError);
+            //verify valid/supported filt
+	    QList<QList<uint>> filters = qvariant_cast<QList<QList<uint>>>(options[CanDriver_ixxatVci::FILTERS]);
+	    QList<QCanBusDevice::Filter> new_filters = qvariant_cast<QList<QCanBusDevice::Filter>>(value);
+	    for(QCanBusDevice::Filter f : new_filters) {
+		QList<uint> formats;
+		switch(f.format) {
+		case QCanBusDevice::Filter::MatchBaseAndExtendedFormat:
+			formats.push_back(0); formats.push_back(1);
+			break;
+		case QCanBusDevice::Filter::MatchExtendedFormat:
+			formats.push_back(1);
+			break;
+		case QCanBusDevice::Filter::MatchBaseFormat:
+			formats.push_back(0);
+		}
+		for(uint format : formats) {
+			QList<uint> ff;
+			ff.push_back(static_cast<uint>(format));
+			ff.push_back(static_cast<uint>(f.frameId));
+			ff.push_back(static_cast<uint>(f.frameIdMask));
+			ff.push_back(static_cast<uint>(QCanBusFrame::RemoteRequestFrame == f.type));
+			filters.push_back(ff);
+		}	
+	    }
+            options[CanDriver_ixxatVci::FILTERS] = QVariant::fromValue(filters);
+	}
         break;
 
         // we need to check CAN FD option a lot -> cache it and avoid QVector lookup
