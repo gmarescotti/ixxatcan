@@ -125,7 +125,7 @@ bool CanDriver_ixxatVci::init (const QVariantMap & options) {
                         const IxxatVciBaudRateRegisters btReg = listBaudRates [idxBaudRate];
                         if (canControlInitialize (m_canCtrlHandle, CAN_OPMODE_STANDARD | CAN_OPMODE_EXTENDED | CAN_OPMODE_ERRFRAME, btReg.bt0, btReg.bt1) == VCI_OK) {
 			        // auto t0 = canControlRemFilterIds(m_canCtrlHandle, false, 0x00000000, 0x00000000);
-			        if(canControlSetAccFilter(m_canCtrlHandle, false, 0x00000000, (0x00000fff << 1)) != VCI_OK) {
+			        if(filters.size() > 0 && canControlSetAccFilter(m_canCtrlHandle, false, 0x00000000, (0x00000fff << 1)) != VCI_OK) {
 					// :TODO: Who fucking cares
 				}
 				for(IxxatVciFilter f : filters) {
