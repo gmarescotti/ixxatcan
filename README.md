@@ -38,6 +38,25 @@ from `C:\Qt\5.13.0\Src\qtserialbus\src\plugins\canbus\build-ixxatcan-Desktop_Qt_
 copy **qtixxatcanbus.dll** and **qtixxatcanbusd.pdb**
 to `C:\Qt\5.13.0\\**msvc2017_64*\plugins\canbus`
 
+## Installation using command line
+
+I use msys2 with mingw64. So for me installtion proccess looks like:
+
+#### Clone the repository
+
+Clone repository in any place
+
+#### Building
+- Cd into clonned repository
+- Create build directory `mkdir build` and cd into it `cd build`
+- Run qmake to generate Makefile `qmake ..`
+- Run make to compile plugin `make` (On windows you probably need to run `mingw32-make`)
+
+#### Using plugin
+
+compiled dll will be in `build/plugins/`
+Copy it to your qt folder(for me it's `/share/qt5/plugins/canbus/`)
+
 ## Testing
 
 [Tested on "Window 7"]
