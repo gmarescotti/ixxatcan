@@ -1,4 +1,4 @@
-﻿/****************************************************************************
+/****************************************************************************
 **
 ** Copyright (C) 2017 The Qt Company Ltd.
 ** Contact: http://www.qt.io/licensing/
@@ -187,6 +187,8 @@ bool IxxatCanBackend::writeFrame(const QCanBusFrame &newData)
         setError(tr("Cannot write invalid QCanBusFrame"), QCanBusDevice::WriteError);
         return false;
     }
+
+    if(!driver->send((CanMessage*)(&newData))) return false;
 
     /*
     canid_t canId = newData.frameId();

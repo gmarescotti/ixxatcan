@@ -304,7 +304,7 @@ void CanDriver_ixxatVciPollWorker::poll (void) {
                 */
 
                 CanMessage *frame = new CanMessage(canMsg.dwMsgId, QByteArray((char*)canMsg.abData, canMsg.uMsgInfo.Bits.dlc));
-                frame->setTimeStamp(CanMessage::TimeStamp::fromMicroSeconds(canMsg.dwTime));
+                frame->setTimeStamp(CanMessage::TimeStamp::fromMicroSeconds(canMsg.dwTime + (m_initialTime * 1000)));
                 frame->setExtendedFrameFormat(canMsg.uMsgInfo.Bits.ext);
                 frame->setLocalEcho(false);
                 frame->setFrameType(convert_type(canMsg));
