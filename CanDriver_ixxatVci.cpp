@@ -85,20 +85,20 @@ bool CanDriver_ixxatVci::init (const QVariantMap & options) {
         if (ctrlAddr != Q_NULLPTR) {
             // emit diag (Information, QS ("Using board %1, controller %2").arg (ctrlAddr->deviceId.AsInt64).arg (ctrlAddr->ctrlIdx));
             const int bitRate = options.value (BIT_RATE).toInt();
-    	    const QList<QList<uint>> filters_vars = qvariant_cast<QList<QList<uint>>>(options.value (FILTERS));
-	    QList<IxxatVciFilter> filters;
-	    for(QList<uint> filter : filters_vars) {
-		IxxatVciFilter f;
-		f.fExtended = filter[0];
-		f.dwCode = filter[1] << 1;
-		f.dwMask = filter[2] << 1;
-		int isRTR = filter[3];
-		if(isRTR) {
-			f.dwCode += 1;
-			f.dwMask += 1;
-		}
-		filters.push_back(f);
-	    }
+            const QList<QList<uint>> filters_vars = qvariant_cast<QList<QList<uint>>>(options.value (FILTERS));
+            QList<IxxatVciFilter> filters;
+            for(QList<uint> filter : filters_vars) {
+                IxxatVciFilter f;
+                f.fExtended = filter[0];
+                f.dwCode = filter[1] << 1;
+                f.dwMask = filter[2] << 1;
+                int isRTR = filter[3];
+                if(isRTR) {
+                    f.dwCode += 1;
+                    f.dwMask += 1;
+                }
+                filters.push_back(f);
+            }
             const int baudRatesCount = 9;
             const IxxatVciBaudRateRegisters listBaudRates [baudRatesCount] = {
                 { 10000,  0x31, 0x1C },
@@ -124,16 +124,19 @@ bool CanDriver_ixxatVci::init (const QVariantMap & options) {
                     if (canControlOpen (m_canDevHanldle, ctrlAddr->ctrlIdx, &m_canCtrlHandle) == VCI_OK) {
                         const IxxatVciBaudRateRegisters btReg = listBaudRates [idxBaudRate];
                         if (canControlInitialize (m_canCtrlHandle, CAN_OPMODE_STANDARD | CAN_OPMODE_EXTENDED | CAN_OPMODE_ERRFRAME, btReg.bt0, btReg.bt1) == VCI_OK) {
-			        // auto t0 = canControlRemFilterIds(m_canCtrlHandle, false, 0x00000000, 0x00000000);
-			        if(filters.size() > 0 && canControlSetAccFilter(m_canCtrlHandle, false, 0x00000000, (0x00000fff << 1)) != VCI_OK) {
-					// :TODO: Who fucking cares
-				}
-				for(IxxatVciFilter f : filters) {
-			        	if(canControlAddFilterIds(m_canCtrlHandle, f.fExtended, f.dwCode, f.dwMask) != VCI_OK) {
-						// :TODO: Please handle me
-					}
-				}
-                            if (canControlStart (m_canCtrlHandle, true) == VCI_OK) {
+                            bool filters_succeed = true;
+                            if(filters.suze() > 0) {
+                                if(canControlSetAccFilter(m_canCtrlHandle, false, 0x00000000, (0x00000fff << 1)) == VCI_OK) {
+                                    for(IxxatVciFilter f : filters) {
+                                        if(canControlAddFilterIds(m_canCtrlHandle, f.fExtended, f.dwCode, f.dwMask) != VCI_OK) {
+                                            filters_succeed = false;
+                                        }
+                                    }
+                                } else {
+                                    filters_succeed = false;
+                                }
+                            }
+                            if (filters_succeed && canControlStart (m_canCtrlHandle, true) == VCI_OK) {
                                 if (canChannelOpen (m_canDevHanldle, ctrlAddr->ctrlIdx, true, &m_canChannelHandle) == VCI_OK) {
                                     if (canChannelInitialize (m_canChannelHandle, 1000, 1, 1000, 1) == VCI_OK) {
                                         if (canChannelActivate (m_canChannelHandle, true) == VCI_OK) {
