@@ -72,6 +72,8 @@ public:
 
 public slots:
     void recv (CanMessage * msg);
+signals:
+    void send (CanMessage * msg);
 
 private:
     // void resetConfigurations();

@@ -28,6 +28,12 @@ struct QTCAN_DRIVER_EXPORT IxxatVciBaudRateRegisters {
     quint8 bt1;
 };
 
+struct QTCAN_DRIVER_EXPORT IxxatVciFilter {
+    BOOL fExtended;
+    UINT32 dwCode;
+    UINT32 dwMask;
+};
+
 class QTCAN_DRIVER_EXPORT IxxatVciCanCtrlsList {
 public:
     static IxxatVciCanCtrlsList & instance (void);
@@ -80,6 +86,7 @@ public:
 
     static const QString CTRL_NAME;
     static const QString BIT_RATE;
+    static const QString FILTERS;
 
 public slots:
     bool init (const QVariantMap & options);
