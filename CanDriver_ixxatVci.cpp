@@ -65,7 +65,7 @@ const QString CanDriver_ixxatVci::FILTERS  = QS ("FILTERS");
 CanDriver_ixxatVci::CanDriver_ixxatVci (QObject * parent)
     : CanDriver (parent)
     , m_valid (false)
-    , m_initialTime (0)
+    // , m_initialTime (0)
     , m_canDevHanldle (0)
     , m_canCtrlHandle (0)
     , m_canChannelHandle (0)
@@ -141,10 +141,10 @@ bool CanDriver_ixxatVci::init (const QVariantMap & options) {
                                     if (canChannelInitialize (m_canChannelHandle, 1000, 1, 1000, 1) == VCI_OK) {
                                         if (canChannelActivate (m_canChannelHandle, true) == VCI_OK) {
                                             // emit diag (Information, QS ("CAN messages channel ready."));
-                                            m_initialTime = QDateTime::currentDateTime ().toMSecsSinceEpoch ();
+                                            // m_initialTime = QDateTime::currentDateTime ().toMSecsSinceEpoch ();
                                             m_valid = true;
                                             m_thread = new QThread (this);
-                                            m_worker = new CanDriver_ixxatVciPollWorker (m_canChannelHandle, m_initialTime);
+                                            m_worker = new CanDriver_ixxatVciPollWorker (m_canChannelHandle/*, m_initialTime*/);
                                             m_worker->moveToThread (m_thread);
                                             connect (m_thread, &QThread::started, m_worker, &CanDriver_ixxatVciPollWorker::poll);
                                             connect (m_worker, &CanDriver_ixxatVciPollWorker::recv, this, &CanDriver_ixxatVci::recv);
@@ -262,11 +262,11 @@ bool CanDriver_ixxatVci::stop (void) {
     return true;
 }
 
-CanDriver_ixxatVciPollWorker::CanDriver_ixxatVciPollWorker (HANDLE canChannelHandle, qint64 initTime)
+CanDriver_ixxatVciPollWorker::CanDriver_ixxatVciPollWorker (HANDLE canChannelHandle/*, qint64 initTime*/)
     : QObject (Q_NULLPTR)
-    , m_initialTime (initTime)
+    // , m_initialTime (initTime)
     , m_canChannelHandle (canChannelHandle)
-{ }
+{ m_initialTime = -1; }
 
 CanDriver_ixxatVciPollWorker::~CanDriver_ixxatVciPollWorker (void) { }
 
@@ -293,10 +293,10 @@ void CanDriver_ixxatVciPollWorker::poll (void) {
         memset (&canMsg, 0x00, sizeof (canMsg));
         HRESULT result = canChannelReadMessage (m_canChannelHandle, 100, &canMsg);
         if (result == VCI_OK) {
-            // const bool err = (canMsg.uMsgInfo.Bits.type == CAN_MSGTYPE_ERROR);
-            // if (canMsg.uMsgInfo.Bits.type == CAN_MSGTYPE_DATA || err) {
-                /*
+            const bool err = (canMsg.uMsgInfo.Bits.type == CAN_MSGTYPE_ERROR);
+            if (canMsg.uMsgInfo.Bits.type == CAN_MSGTYPE_DATA || err) {
                 const bool rtr = bool (canMsg.uMsgInfo.Bits.rtr);
+                /*
 
                 emit recv (new CanMessage ((canMsg.uMsgInfo.Bits.ext
                                             ? CanId (quint32 (canMsg.dwMsgId), rtr, err)
@@ -306,18 +306,25 @@ void CanDriver_ixxatVciPollWorker::poll (void) {
                 QDateTime::fromMSecsSinceEpoch (qint64 (canMsg.dwTime / 1000.0) + m_initialTime)
                 */
 
-                CanMessage *frame = new CanMessage(canMsg.dwMsgId, QByteArray((char*)canMsg.abData, canMsg.uMsgInfo.Bits.dlc));
-                frame->setTimeStamp(CanMessage::TimeStamp::fromMicroSeconds(canMsg.dwTime + (m_initialTime * 1000)));
-                frame->setExtendedFrameFormat(canMsg.uMsgInfo.Bits.ext);
-                frame->setLocalEcho(false);
-                frame->setFrameType(convert_type(canMsg));
+                if (!rtr && !err) {
 
-                frame->setFlexibleDataRateFormat(false);
-                frame->setBitrateSwitch(false);
-                frame->setErrorStateIndicator(false);
+                    CanMessage *frame = new CanMessage(canMsg.dwMsgId, QByteArray((char*)canMsg.abData, canMsg.uMsgInfo.Bits.dlc));
+                    if (m_initialTime == -1) {
+                        m_initialTime = QDateTime::currentDateTime ().toMSecsSinceEpoch ();
+                        m_initialTime -= (canMsg.dwTime/1000);
+                    }
+                    frame->setTimeStamp(CanMessage::TimeStamp::fromMicroSeconds(canMsg.dwTime + (m_initialTime * 1000)));
+                    frame->setExtendedFrameFormat(canMsg.uMsgInfo.Bits.ext);
+                    frame->setLocalEcho(false);
+                    frame->setFrameType(convert_type(canMsg));
 
-                emit recv(frame);
-            // }
+                    frame->setFlexibleDataRateFormat(false);
+                    frame->setBitrateSwitch(false);
+                    frame->setErrorStateIndicator(err);
+
+                    emit recv(frame);
+                }
+            }
         }
         else if (result == HRESULT (VCI_E_TIMEOUT) ||
                  result == HRESULT (VCI_E_RXQUEUE_EMPTY)) {

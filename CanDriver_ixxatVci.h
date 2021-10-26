@@ -56,7 +56,7 @@ class QTCAN_DRIVER_EXPORT CanDriver_ixxatVciPollWorker : public QObject {
     Q_OBJECT
 
 public:
-    explicit CanDriver_ixxatVciPollWorker (HANDLE canChannelHandle, qint64 initTime);
+    explicit CanDriver_ixxatVciPollWorker (HANDLE canChannelHandle/*, qint64 initTime*/);
     ~CanDriver_ixxatVciPollWorker (void);
 
     struct Controller {
@@ -98,7 +98,7 @@ signals: // from original CanDriver
 
 private:
     bool m_valid;
-    qint64 m_initialTime;
+    // qint64 m_initialTime;
     HANDLE m_canDevHanldle;
     HANDLE m_canCtrlHandle;
     HANDLE m_canChannelHandle;
