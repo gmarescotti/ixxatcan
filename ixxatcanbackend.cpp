@@ -51,7 +51,7 @@ Q_DECLARE_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_IXXATCAN)
 
 QList<QCanBusDeviceInfo> IxxatCanBackend::interfaces()
 {
-    qDebug() << "Function Name: " << Q_FUNC_INFO;
+    qCDebug(QT_CANBUS_PLUGINS_IXXATCAN) << "Function Name: " << Q_FUNC_INFO;
     QList<QCanBusDeviceInfo> result;
 
     IxxatVciCanCtrlsList::instance().refreshControllers();
@@ -66,7 +66,7 @@ QList<QCanBusDeviceInfo> IxxatCanBackend::interfaces()
 IxxatCanBackend::IxxatCanBackend(const QString &name)
     // : canIxxatName(name)
 {
-    qDebug() << "Function Name: " << Q_FUNC_INFO;
+    qCDebug(QT_CANBUS_PLUGINS_IXXATCAN) << "Function Name: " << Q_FUNC_INFO;
     options[CanDriver_ixxatVci::CTRL_NAME] = name;
     options[CanDriver_ixxatVci::BIT_RATE] = 250000;
     // resetConfigurations();
@@ -74,14 +74,14 @@ IxxatCanBackend::IxxatCanBackend(const QString &name)
 
 IxxatCanBackend::~IxxatCanBackend()
 {
-    qDebug() << "Function Name: " << Q_FUNC_INFO;
+    qCDebug(QT_CANBUS_PLUGINS_IXXATCAN) << "Function Name: " << Q_FUNC_INFO;
     if (state() == ConnectedState)
         close();
 }
 
 bool IxxatCanBackend::open()
 {
-    qDebug() << "Function Name: " << Q_FUNC_INFO;
+    qCDebug(QT_CANBUS_PLUGINS_IXXATCAN) << "Function Name: " << Q_FUNC_INFO;
 
     driver = new CanDriver_ixxatVci(/*parent*/);
     driver->init(options);
@@ -95,6 +95,8 @@ bool IxxatCanBackend::open()
 
 void IxxatCanBackend::recv (CanMessage * frame)
 {
+    qCDebug(QT_CANBUS_PLUGINS_IXXATCAN) << "Function Name: " << Q_FUNC_INFO;
+
     QVector<QCanBusFrame> newFrames;
 
     newFrames.append(std::move(*frame));
@@ -104,14 +106,14 @@ void IxxatCanBackend::recv (CanMessage * frame)
 
 void IxxatCanBackend::close()
 {
-    qDebug() << "Function Name: " << Q_FUNC_INFO;
+    qCDebug(QT_CANBUS_PLUGINS_IXXATCAN) << "Function Name: " << Q_FUNC_INFO;
     driver->stop();
     setState(QCanBusDevice::UnconnectedState);
 }
 
 void IxxatCanBackend::setConfigurationParameter(int key, const QVariant &value)
 {
-    qDebug() << "Function Name: " << Q_FUNC_INFO << ": " << key << "=" << value;
+    qCDebug(QT_CANBUS_PLUGINS_IXXATCAN) << "Function Name: " << Q_FUNC_INFO << ": " << key << "=" << value;
 
     /*
     4 = QVariant(int, 250000)
@@ -168,18 +170,18 @@ void IxxatCanBackend::setConfigurationParameter(int key, const QVariant &value)
         setError(tr("CAN-FD not managed!"), QCanBusDevice::CanBusError::ConfigurationError);
         return;
     default:
-        qDebug() << "No KEY";
+        qCDebug(QT_CANBUS_PLUGINS_IXXATCAN) << "No KEY";
         return;
 
     }
 
-    qDebug() << "Configuration Activated!"; //  << key << "=>" << value.toString();
+    qCDebug(QT_CANBUS_PLUGINS_IXXATCAN) << "Configuration Activated!"; //  << key << "=>" << value.toString();
     QCanBusDevice::setConfigurationParameter(key, value);
 }
 
 bool IxxatCanBackend::writeFrame(const QCanBusFrame &newData)
 {
-    qDebug() << "Function Name: " << Q_FUNC_INFO;
+    qCDebug(QT_CANBUS_PLUGINS_IXXATCAN) << "Function Name: " << Q_FUNC_INFO;
     if (state() != ConnectedState)
         return false;
 
@@ -245,7 +247,7 @@ bool IxxatCanBackend::writeFrame(const QCanBusFrame &newData)
 
 QString IxxatCanBackend::interpretErrorFrame(const QCanBusFrame &errorFrame)
 {
-    qDebug() << "Function Name: " << Q_FUNC_INFO;
+    qCDebug(QT_CANBUS_PLUGINS_IXXATCAN) << "Function Name: " << Q_FUNC_INFO;
     if (errorFrame.frameType() != QCanBusFrame::ErrorFrame)
         return QString();
 

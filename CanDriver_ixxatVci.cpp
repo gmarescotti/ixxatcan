@@ -4,11 +4,17 @@
 // #include "CanMessage.h"
 // #include <QtGlobal>
 #include <QDebug>
+#include <QtCore/qloggingcategory.h>
 #include <QDate>
 
 #include <QStringBuilder>
 
 #define QS QStringLiteral
+
+Q_DECLARE_LOGGING_CATEGORY(QT_CANBUS_PLUGINS_IXXATCAN)
+
+int Error = 1;
+int Information = 2;
 
 IxxatVciCanCtrlsList & IxxatVciCanCtrlsList::instance (void) {
     static IxxatVciCanCtrlsList ret;
@@ -27,7 +33,7 @@ void IxxatVciCanCtrlsList::refreshControllers (void) {
         while (vciEnumDeviceNext (devEnumeratorHandle, &devInfo) == VCI_OK) {
             if (vciDeviceOpen (devInfo.VciObjectId, &devHandle) == VCI_OK) {
                 vciDeviceGetCaps (devHandle, &devCaps);
-                qWarning () << qPrintable (QString::fromLatin1 (devInfo.UniqueHardwareId.AsChar))
+                qCWarning (QT_CANBUS_PLUGINS_IXXATCAN) << qPrintable (QString::fromLatin1 (devInfo.UniqueHardwareId.AsChar))
                             << qPrintable (QString::fromLatin1 (devInfo.Manufacturer))
                             << qPrintable (QString::fromLatin1 (devInfo.Description));
                 for (int ctrlIdx = 0; ctrlIdx < devCaps.BusCtrlCount; ++ctrlIdx) {
@@ -44,7 +50,7 @@ void IxxatVciCanCtrlsList::refreshControllers (void) {
         vciEnumDeviceClose (devEnumeratorHandle);
     }
     else {
-        qWarning () << "Can't open VCI device enumerator !";
+        qCWarning (QT_CANBUS_PLUGINS_IXXATCAN) << "Can't open VCI device enumerator !";
     }
 }
 
@@ -80,10 +86,10 @@ CanDriver_ixxatVci::~CanDriver_ixxatVci (void) {
 bool CanDriver_ixxatVci::init (const QVariantMap & options) {
     const QString ctrlName = options.value (CTRL_NAME).toString ();
     if (!ctrlName.isEmpty ()) {
-        // emit diag (Information, QS ("Using controller with name : ") % ctrlName);
+        qCInfo(QT_CANBUS_PLUGINS_IXXATCAN) << "Using controller with name : " << ctrlName;
         IxxatVciCanCtrlAddr * ctrlAddr = IxxatVciCanCtrlsList::instance ().controllerByName (ctrlName);
         if (ctrlAddr != Q_NULLPTR) {
-            // emit diag (Information, QS ("Using board %1, controller %2").arg (ctrlAddr->deviceId.AsInt64).arg (ctrlAddr->ctrlIdx));
+            qCInfo(QT_CANBUS_PLUGINS_IXXATCAN) << "Using board " << ctrlAddr->deviceId.AsInt64 << ", controller " << ctrlAddr->ctrlIdx;
             const int bitRate = options.value (BIT_RATE).toInt();
             const QList<QList<uint>> filters_vars = qvariant_cast<QList<QList<uint>>>(options.value (FILTERS));
             QList<IxxatVciFilter> filters;
@@ -119,7 +125,7 @@ bool CanDriver_ixxatVci::init (const QVariantMap & options) {
                 }
             }
             if (idxBaudRate > -1) {
-                // emit diag (Information, QS ("Using bitrate ") % bitRate);
+                qCInfo(QT_CANBUS_PLUGINS_IXXATCAN) << "Using bitrate " << bitRate;
                 if (vciDeviceOpen (ctrlAddr->deviceId, &m_canDevHanldle) == VCI_OK) {
                     if (canControlOpen (m_canDevHanldle, ctrlAddr->ctrlIdx, &m_canCtrlHandle) == VCI_OK) {
                         const IxxatVciBaudRateRegisters btReg = listBaudRates [idxBaudRate];
@@ -140,7 +146,7 @@ bool CanDriver_ixxatVci::init (const QVariantMap & options) {
                                 if (canChannelOpen (m_canDevHanldle, ctrlAddr->ctrlIdx, true, &m_canChannelHandle) == VCI_OK) {
                                     if (canChannelInitialize (m_canChannelHandle, 1000, 1, 1000, 1) == VCI_OK) {
                                         if (canChannelActivate (m_canChannelHandle, true) == VCI_OK) {
-                                            // emit diag (Information, QS ("CAN messages channel ready."));
+                                            qCInfo(QT_CANBUS_PLUGINS_IXXATCAN) << "CAN messages channel ready.";
                                             // m_initialTime = QDateTime::currentDateTime ().toMSecsSinceEpoch ();
                                             m_valid = true;
                                             m_thread = new QThread (this);
@@ -152,11 +158,11 @@ bool CanDriver_ixxatVci::init (const QVariantMap & options) {
                                             m_thread->start ();
                                         }
                                         else {
-                                            // emit diag (Error, QS ("Can't activate CAN messages channel !"));
+                                            qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << "Can't activate CAN messages channel !";
                                         }
                                     }
                                     else {
-                                        // emit diag (Error, QS ("Can't initialize CAN messages channel !"));
+                                        qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << "Can't initialize CAN messages channel !";
                                     }
                                     if (!m_valid) {
                                         canChannelClose (m_canChannelHandle);
@@ -164,15 +170,15 @@ bool CanDriver_ixxatVci::init (const QVariantMap & options) {
                                     }
                                 }
                                 else {
-                                    // emit diag (Error, QS ("Can't open CAN messages channel !"));
+                                    qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << "Can't open CAN messages channel !";
                                 }
                             }
                             else {
-                                // emit diag (Error, QS ("Can't start CAN controller !"));
+                                qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << "Can't start CAN controller !";
                             }
                         }
                         else {
-                            // emit diag (Error, QS ("Can't initialize CAN controller !"));
+                            qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << "Can't initialize CAN controller !";
                         }
                         if (!m_valid) {
                             canControlClose (m_canCtrlHandle);
@@ -180,7 +186,7 @@ bool CanDriver_ixxatVci::init (const QVariantMap & options) {
                         }
                     }
                     else {
-                        // emit diag (Error, QS ("Can't open CAN controller !"));
+                        qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << "Can't open CAN controller !";
                     }
                     if (!m_valid) {
                         vciDeviceClose (m_canDevHanldle);
@@ -188,19 +194,19 @@ bool CanDriver_ixxatVci::init (const QVariantMap & options) {
                     }
                 }
                 else {
-                    // emit diag (Error, QS ("Can't open VCI device ! ") % ctrlName);
+                    qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << "Can't open VCI device ! " << ctrlName;
                 }
             }
             else {
-                // emit diag (Error, QS ("Can't use invalid bitrate ! ") % bitRate);
+                qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << "Can't use invalid bitrate ! " << bitRate;
             }
         }
         else {
-            // emit diag (Error, QS ("No controller with name ! ") % ctrlName);
+            qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << "No controller with name ! " << ctrlName;
         }
     }
     else {
-        // emit diag (Error, "Can't use empty controller name !");
+        qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << "Can't use empty controller name !";
     }
     return m_valid;
 }
@@ -224,7 +230,7 @@ bool CanDriver_ixxatVci::send (CanMessage * message) {
                 ret = true;
             }
             else {
-                // emit diag (Error, "Can't send CAN message !");
+                qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << "Can't send CAN message !";
             }
         }
     }
@@ -234,7 +240,7 @@ bool CanDriver_ixxatVci::send (CanMessage * message) {
 bool CanDriver_ixxatVci::stop (void) {
     if (m_valid) {
         m_valid = false;
-        // emit diag (Information, QS ("Stop IXXAT VCI poll worker thread"));
+        qCInfo(QT_CANBUS_PLUGINS_IXXATCAN) << "Stop IXXAT VCI poll worker thread";
         if (m_worker) {
             m_worker->controller.exit = true;
         }
@@ -244,14 +250,14 @@ bool CanDriver_ixxatVci::stop (void) {
             delete m_worker;
             delete m_thread;
         }
-        // emit diag (Information, QS ("Stop IXXAT VCI controller and message channel"));
+        qCInfo(QT_CANBUS_PLUGINS_IXXATCAN) << "Stop IXXAT VCI controller and message channel";
         canChannelActivate (m_canChannelHandle, false);
         canControlStart    (m_canCtrlHandle,    false);
-        // emit diag (Information, QS ("Close IXXAT VCI channel"));
+        qCInfo(QT_CANBUS_PLUGINS_IXXATCAN) << "Close IXXAT VCI channel";
         canControlReset (m_canCtrlHandle);
         canChannelClose (m_canChannelHandle);
         canControlClose (m_canCtrlHandle);
-        // emit diag (Information, QS ("Close IXXAT VCI device"));
+        qCInfo(QT_CANBUS_PLUGINS_IXXATCAN) << "Close IXXAT VCI device";
         vciDeviceClose (m_canDevHanldle);
     }
     m_canDevHanldle    = 0;
@@ -288,7 +294,7 @@ static CanMessage::FrameType convert_type(CANMSG canMsg)
 
 void CanDriver_ixxatVciPollWorker::poll (void) {
     static CANMSG canMsg;
-    // emit diag (CanDriver::Information, QS ("Entered infinite poll loop"));
+    qCInfo(QT_CANBUS_PLUGINS_IXXATCAN) << "Entered infinite poll loop";
     while (!controller.exit) {
         memset (&canMsg, 0x00, sizeof (canMsg));
         HRESULT result = canChannelReadMessage (m_canChannelHandle, 100, &canMsg);
@@ -331,10 +337,10 @@ void CanDriver_ixxatVciPollWorker::poll (void) {
             // NOTE : nothing to read yet...
         }
         else {
-            // emit diag (CanDriver::Warning, QS ("Error %1 receiving CAN frame ! ").arg (result));
+            qCWarning(QT_CANBUS_PLUGINS_IXXATCAN) << "Error " << result << " receiving CAN frame ! ";
         }
     }
-    // emit diag (CanDriver::Information, QS ("Exited infinite poll loop"));
+    qCInfo(QT_CANBUS_PLUGINS_IXXATCAN) << "Exited infinite poll loop";
 }
 
 #ifndef QTCAN_STATIC_DRIVERS
