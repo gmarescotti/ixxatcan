@@ -22,6 +22,8 @@ SOURCES += \
 
 contains( DEFINES, USE_SOCKET ) {
 
+message(building IXXAT SOCKET version!)
+
 HEADERS += \
 
 SOURCES += \
@@ -38,6 +40,8 @@ INCLUDEPATH += \
 
 } else {
 
+message(building IXXAT OLD version!)
+
 HEADERS += \
 
 SOURCES += \
@@ -49,6 +53,10 @@ INCLUDEPATH += \
 
     equals(QT_ARCH, x86_64): LIBS += "$$PWD/VciWindows_4.0/lib/x64/vcinpl.lib"
     equals(QT_ARCH, i386): LIBS += "$$PWD/VciWindows_4.0/lib/ia32/vcinpl.lib"
+}
+
+win32 {
+    QMAKE_POST_LINK += copy /y $$shell_path($$OUT_PWD/plugins/canbus/qtixxatcanbus*.dll $$[QT_INSTALL_PLUGINS]/canbus)
 }
 
 PLUGIN_TYPE = canbus
