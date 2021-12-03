@@ -42,8 +42,7 @@
 #include <QtCore/qfile.h>
 #include <QtCore/qloggingcategory.h>
 
-#include "CanDriver_ixxatVci.h"
-
+#include "ixxatcanbackend.h"
 
 QT_BEGIN_NAMESPACE
 
