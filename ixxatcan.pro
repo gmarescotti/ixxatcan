@@ -56,7 +56,10 @@ INCLUDEPATH += \
 }
 
 win32 {
-    QMAKE_POST_LINK += copy /y $$shell_path($$OUT_PWD/plugins/canbus/qtixxatcanbus*.dll $$[QT_INSTALL_PLUGINS]/canbus)
+    # QMAKE_POST_LINK += copy /y $$shell_path($$OUT_PWD/plugins/canbus/qtixxatcanbus*.dll $$[QT_INSTALL_PLUGINS]/canbus)
+    target.path = $$[QT_INSTALL_PLUGINS]/canbus
+    INSTALL += target
+    message(install in $$target.path)
 }
 
 PLUGIN_TYPE = canbus
