@@ -271,6 +271,10 @@ HRESULT InitSocket(LONG lCtrlNo, QList<IxxatVciFilter> &filters, const int bitRa
 
   // inclusive filtering (pass registered IDs) and
   // pass self-rec messages from all channels
+  // If the interface ICanControl is used, the operating mode of the filter can not be changed and
+  // is preset to CAN_FILTER_INCL. If the interface ICanControl2 resp. ICanChannel2 is
+  // used, the operating mode can be set to one of the above stated modes with the function
+  // SetFilterMode
   hResult = pCanChn->Initialize(wRxFifoSize, wTxFifoSize); // , 0, CAN_FILTER_INCL|CAN_FILTER_SRRA);
   MYASSERT (hResult, "Invalid Initialize", hResult);
 
@@ -387,7 +391,7 @@ bool CanDriver_ixxatVci::init (const QVariantMap & options) {
     QList<IxxatVciFilter> filters;
     for(QList<uint> filter : filters_vars) {
         IxxatVciFilter f;
-        f.fExtended = filter[0];
+        f.fExtended = filter[0] ? CAN_FILTER_EXT : CAN_FILTER_STD;
         f.dwCode = filter[1] << 1;
         f.dwMask = filter[2] << 1;
         int isRTR = filter[3];
