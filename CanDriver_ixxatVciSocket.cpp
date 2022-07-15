@@ -351,8 +351,14 @@ HRESULT InitSocket(LONG lCtrlNo, QList<IxxatVciFilter> &filters, const int bitRa
 
       // set the acceptance filter
       if(filters.size() > 0) {
+          static bool first=true;
           for(IxxatVciFilter f : filters) {
-              hResult = pCanControl->SetAccFilter(f.fExtended, f.dwCode, f.dwMask);
+              if (first) {
+                  hResult = pCanControl->SetAccFilter(f.fExtended, f.dwCode, f.dwMask);
+                  first=false;
+              } else {
+                  hResult = pCanControl->AddFilterIds(f.fExtended, f.dwCode, f.dwMask);
+              }
               // SetAccFilter() returns VCI_E_INVALID_STATE if already controller is started.
               // We ignore this because the controller could already be started
               // by another application.
