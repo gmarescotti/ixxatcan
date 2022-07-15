@@ -32,14 +32,14 @@ int Information = 2;
   }
 
 #define MYASSERT_INV(hResult, msg, ret) \
-  if ((hResult != VCI_OK) || (hResult != VCI_E_INVALID_STATE)) { \
+  if ((hResult != VCI_OK) && (hResult != VCI_E_INVALID_STATE)) { \
     qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << msg << " (" << hResult << ")"; \
     assert (FALSE); \
     return ret; \
   }
 
 #define MYASSERT_INFO(hResult, msg) \
-  if ((hResult != VCI_OK) || (hResult != VCI_E_INVALID_STATE)) { \
+  if ((hResult != VCI_OK) && (hResult != VCI_E_INVALID_STATE)) { \
     qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << msg << " (" << hResult << ")"; \
     assert (FALSE); \
   }
