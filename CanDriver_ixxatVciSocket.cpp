@@ -26,21 +26,21 @@ int Information = 2;
 
 #define MYASSERT(hResult, msg, ret) \
   if (hResult != VCI_OK) { \
-    qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << msg << " (" << hResult << ")"; \
+    qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << msg << " (" << Qt::hex << (UINT32)hResult << ")"; \
     assert (FALSE); \
     return ret; \
   }
 
 #define MYASSERT_INV(hResult, msg, ret) \
   if ((hResult != VCI_OK) && (hResult != VCI_E_INVALID_STATE)) { \
-    qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << msg << " (" << hResult << ")"; \
+    qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << msg << " (" << Qt::hex << (UINT32) hResult << ")"; \
     assert (FALSE); \
     return ret; \
   }
 
 #define MYASSERT_INFO(hResult, msg) \
   if ((hResult != VCI_OK) && (hResult != VCI_E_INVALID_STATE)) { \
-    qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << msg << " (" << hResult << ")"; \
+    qCCritical(QT_CANBUS_PLUGINS_IXXATCAN) << msg << " (" << Qt::hex << (UINT32) hResult << ")"; \
     assert (FALSE); \
   }
 
